@@ -2,7 +2,7 @@
 </script>
 
 <main>
-  <h1>lol</h1>
+  <h1>bagelrun</h1>
 </main>
 
 <style>
