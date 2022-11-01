@@ -4,23 +4,18 @@
   import { onMount } from "svelte";
   import { db, app } from "./Firebase";
   import {
-    Form,
-    FormGroup,
-    Checkbox,
-    RadioButtonGroup,
-    RadioButton,
-    Select,
-    SelectItem,
     Button,
     Modal,
+    TextInput,
+    Loading,
+    Tile,
   } from "carbon-components-svelte";
 
   let event;
   let open = false;
-
-  let num_bagels_selected;
-
-  let answer = "";
+  let numDozenSelected = 0;
+  let dzn_1, dzn_2, dzn_3;
+  let venmo;
 
   onMount(async () => {
     const eventsRef = collection(db, "events");
@@ -34,8 +29,8 @@
 </script>
 
 <main>
-  <h1>bagelrun</h1>
   {#if event}
+    <h1>bagelrun</h1>
     <span>
       <h2>{event.title}</h2>
       <h3>
@@ -62,23 +57,47 @@
       on:click:button--secondary={() => (open = false)}
       on:open
       on:close
-      on:submit={(e) => {
-        e.preventDefault();
-        console.log("submit", e);
-      }}
+      on:submit
     >
-      <Form>
-        <FormGroup legendText="# of dozen">
-          <Select>
-            <SelectItem value="option-1" text="1" />
-            <SelectItem value="option-2" text="2" />
-            <SelectItem value="option-3" text="3" />
-          </Select>
-        </FormGroup>
-      </Form>
+      <div>
+        <label for="dozen_select">Select # dozen</label>
+        <select id="dozen_select" bind:value={numDozenSelected}>
+          <option selected disabled value="placeholder-item"
+            >Choose # of dozen</option
+          >
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+        </select>
+      </div>
+      {#each { length: numDozenSelected } as _, i}
+        <span>
+          <select on:change={() => console.log()}>
+            {#each event.varieties as variety}
+              <option value={variety}>{variety}</option>
+            {/each}
+          </select>
+        </span>
+      {/each}
+      <div>
+        <TextInput labelText="who are ya" placeholder="Enter your name..." />
+        <TextInput
+          labelText="venmo address"
+          helperText="I'll send a payment req once the bagels have been ordered"
+          placeholder="Enter your venmo..."
+        />
+        <TextInput labelText="secret passcode" placeholder="passcode" />
+      </div>
+      <div>
+        <Tile light>
+          <h3>
+            Total: ${numDozenSelected * event.price_per_dozen}.00
+          </h3>
+        </Tile>
+      </div>
     </Modal>
   {:else}
-    <p>loading...</p>
+    <Loading />
   {/if}
 </main>
 
