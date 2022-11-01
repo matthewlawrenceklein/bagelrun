@@ -13,9 +13,11 @@
 
   let event;
   let open = false;
+  let processing = false;
   let numDozenSelected = 0;
-  let dzn_1, dzn_2, dzn_3;
   let venmo;
+  let name;
+  let passcode;
 
   onMount(async () => {
     const eventsRef = collection(db, "events");
@@ -26,6 +28,12 @@
       event = doc.data();
     });
   });
+
+  const handleSubmit = () => {
+    // processing = true;
+    console.log(venmo, name, passcode);
+    // open = false;
+  };
 </script>
 
 <main>
@@ -42,6 +50,9 @@
         >, {event.vendor.location}
       </h3>
       <h3>${event.price_per_dozen}/dz</h3>
+      <h3>
+        {event.num_dz_remaining + "/" + event.num_dz_available} slots left
+      </h3>
       <ul>
         {#each event.varieties as variety}
           <li>{variety}</li>
@@ -57,37 +68,52 @@
       on:click:button--secondary={() => (open = false)}
       on:open
       on:close
-      on:submit
+      on:submit={() => handleSubmit()}
     >
-      <div>
-        <label for="dozen_select">Select # dozen</label>
-        <select id="dozen_select" bind:value={numDozenSelected}>
-          <option selected disabled value="placeholder-item"
-            >Choose # of dozen</option
-          >
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-        </select>
-      </div>
-      {#each { length: numDozenSelected } as _, i}
-        <span>
-          <select on:change={() => console.log()}>
-            {#each event.varieties as variety}
-              <option value={variety}>{variety}</option>
-            {/each}
-          </select>
-        </span>
-      {/each}
-      <div>
-        <TextInput labelText="who are ya" placeholder="Enter your name..." />
-        <TextInput
-          labelText="venmo address"
-          helperText="I'll send a payment req once the bagels have been ordered"
-          placeholder="Enter your venmo..."
-        />
-        <TextInput labelText="secret passcode" placeholder="passcode" />
-      </div>
+      <span>
+        {#if processing}
+          <Loading />
+        {:else}
+          <div>
+            <label for="dozen_select">Select # dozen</label>
+            <select id="dozen_select" bind:value={numDozenSelected}>
+              <option selected disabled value="placeholder-item"
+                >Choose # of dozen</option
+              >
+              <option value="1">1</option>
+              <option value="2">2</option>
+              <option value="3">3</option>
+            </select>
+          </div>
+          {#each { length: numDozenSelected } as _, i}
+            <span>
+              <select on:change={() => console.log()}>
+                {#each event.varieties as variety}
+                  <option value={variety}>{variety}</option>
+                {/each}
+              </select>
+            </span>
+          {/each}
+          <div>
+            <TextInput
+              bind:value={name}
+              labelText="who are ya"
+              placeholder="Enter your name..."
+            />
+            <TextInput
+              bind:value={venmo}
+              labelText="venmo address"
+              helperText="I'll send a payment req once the bagels have been ordered"
+              placeholder="Enter your venmo..."
+            />
+            <TextInput
+              bind:value={passcode}
+              labelText="secret passcode"
+              placeholder="passcode"
+            />
+          </div>
+        {/if}
+      </span>
       <div>
         <Tile light>
           <h3>
